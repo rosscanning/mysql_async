@@ -815,6 +815,7 @@ impl Conn {
     /// Returns a future that resolves to [`Conn`].
     pub fn new<T: Into<Opts>>(opts: T) -> crate::BoxFuture<'static, Conn> {
         let opts = opts.into();
+        eprintln!("Conn::new {opts:?}");
         async move {
             let mut conn = Conn::empty(opts.clone());
 

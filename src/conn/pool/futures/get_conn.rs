@@ -129,6 +129,7 @@ impl Future for GetConn {
                             Poll::Ready(Ok(c))
                         }
                         Err(e) => {
+                            eprintln!("{e:?}");
                             pool.cancel_connection();
                             Poll::Ready(Err(e))
                         }
