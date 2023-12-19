@@ -64,6 +64,7 @@ pub struct GetConn {
 
 impl GetConn {
     pub(crate) fn new(pool: &Pool) -> GetConn {
+        eprintln!("GetConn::new()");
         GetConn {
             pool: Some(pool.clone()),
             inner: GetConnInner::New,
@@ -89,6 +90,7 @@ impl Future for GetConn {
     type Output = Result<Conn>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        eprintln!("GetConn::poll()");
         loop {
             match self.inner {
                 GetConnInner::New => match ready!(Pin::new(self.pool_mut()).poll_new_conn(cx))?
