@@ -32,6 +32,7 @@ impl Socket {
     /// Connects a new socket.
     #[cfg(unix)]
     pub async fn new<P: AsRef<Path>>(path: P) -> Result<Socket, io::Error> {
+        eprintln!("io/socket.rs/Socket::new()");
         Ok(Socket {
             inner: tokio::net::UnixStream::connect(path).await?,
         })

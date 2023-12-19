@@ -93,27 +93,31 @@ impl Future for GetConn {
         eprintln!("GetConn::poll()");
         loop {
             match self.inner {
-                GetConnInner::New => match ready!(Pin::new(self.pool_mut()).poll_new_conn(cx))?
-                    .inner
-                    .take()
-                {
-                    GetConnInner::Connecting(conn_fut) => {
-                        self.inner = GetConnInner::Connecting(conn_fut);
+                GetConnInner::New => {
+                    eprintln!("GetConn::poll() - New variant");
+                    match ready!(Pin::new(self.pool_mut()).poll_new_conn(cx))?
+                        .inner
+                        .take()
+                    {
+                        GetConnInner::Connecting(conn_fut) => {
+                            self.inner = GetConnInner::Connecting(conn_fut);
+                        }
+                        GetConnInner::Checking(conn_fut) => {
+                            self.inner = GetConnInner::Checking(conn_fut);
+                        }
+                        GetConnInner::Done => unreachable!(
+                            "Pool::poll_new_conn never gives out already-consumed GetConns"
+                        ),
+                        GetConnInner::New => {
+                            unreachable!("Pool::poll_new_conn never gives out GetConnInner::New")
+                        }
                     }
-                    GetConnInner::Checking(conn_fut) => {
-                        self.inner = GetConnInner::Checking(conn_fut);
-                    }
-                    GetConnInner::Done => unreachable!(
-                        "Pool::poll_new_conn never gives out already-consumed GetConns"
-                    ),
-                    GetConnInner::New => {
-                        unreachable!("Pool::poll_new_conn never gives out GetConnInner::New")
-                    }
-                },
+                }
                 GetConnInner::Done => {
                     unreachable!("GetConn::poll polled after returning Async::Ready");
                 }
                 GetConnInner::Connecting(ref mut f) => {
+                    eprintln!("GetConn::poll() - Connecting");
                     let result = ready!(Pin::new(f).poll(cx));
                     let pool = self.pool_take();
 
@@ -131,6 +135,7 @@ impl Future for GetConn {
                     };
                 }
                 GetConnInner::Checking(ref mut f) => {
+                    eprintln!("GetConn::poll() - Checking");
                     let result = ready!(Pin::new(f).poll(cx));
                     match result {
                         Ok(mut checked_conn) => {

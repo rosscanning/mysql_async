@@ -52,6 +52,7 @@ impl Endpoint {
         *self = match self {
             Endpoint::Plain(ref mut stream) => {
                 let stream = stream.take().unwrap();
+                eprintln!("io/tls/native_tls_io.rs/Endpoint::Plain variant");
                 let tls_stream = tls_connector.connect(&*domain, stream).await?;
                 Endpoint::Secure(tls_stream)
             }

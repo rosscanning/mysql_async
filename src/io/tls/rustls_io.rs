@@ -80,6 +80,7 @@ impl Endpoint {
 
                 let client_config = Arc::new(config);
                 let tls_connector = TlsConnector::from(client_config);
+                eprintln!("io/tls/rustls_io.rs/Endpoint::Plain variant");
                 let connection = tls_connector.connect(server_name, stream).await?;
 
                 Endpoint::Secure(connection)

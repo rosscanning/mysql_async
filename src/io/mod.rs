@@ -361,10 +361,12 @@ impl Stream {
     ) -> io::Result<Stream> {
         let tcp_stream = match addr {
             HostPortOrUrl::HostPort(host, port) => {
+                eprintln!("io/mod.rs/connect_tcp: hostport");
                 TcpStream::connect((host.as_str(), *port)).await?
             }
             HostPortOrUrl::Url(url) => {
                 let addrs = url.socket_addrs(|| Some(DEFAULT_PORT))?;
+                eprintln!("io/mod.rs/connect_tcp - URL");
                 TcpStream::connect(&*addrs).await?
             }
         };
